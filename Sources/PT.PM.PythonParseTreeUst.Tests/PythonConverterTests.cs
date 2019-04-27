@@ -9,10 +9,11 @@ namespace PT.PM.PythonParseTreeUst.Tests
     class PythonConverterTests
     {
         //TODO: add python2 examples
-        [TestCase("python3")]
-        public void Convert_PythonFiles_WithoutErrors(string examplesFolder)
+        [TestCase("python3", "examples")]
+        [TestCase("python3-cs", "cases")]
+        public void Convert_PythonFiles_WithoutErrors(string langFolder, string examplesFolder)
         {
-            TestUtility.CheckProject(Path.Combine(TestUtility.GrammarsDirectory, examplesFolder, "examples"),
+            TestUtility.CheckProject(Path.Combine(TestUtility.GrammarsDirectory, langFolder, examplesFolder),
                 Language.Python, Stage.Ust);
         }
 
@@ -20,7 +21,8 @@ namespace PT.PM.PythonParseTreeUst.Tests
         public void Convert_PythonPatterns_MatchedResultsEqual()
         {
             var patternsLogger = new TestLogger();
-            TestUtility.CheckFile(Path.Combine(TestUtility.TestsDataPath, "python_patterns.py"), Stage.Match, patternsLogger);
+            TestUtility.CheckFile(Path.Combine(TestUtility.TestsDataPath, "python_patterns.py"), Stage.Match,
+                patternsLogger);
 
             Assert.AreEqual(7, patternsLogger.Matches.Count);
         }

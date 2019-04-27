@@ -324,15 +324,8 @@ namespace PT.PM.PythonParseTreeUst
                 .Where(x => (x as ITerminalNode)?.Symbol.Type == PythonLexer.COMMA);
             var assignments = new List<AssignmentExpression>(leftContexts.Count());
             var textSpan = context.GetTextSpan();
-            foreach (var leftContext in leftContexts)
-            {
-                assignments.Add(
-                    new AssignmentExpression
-                    {
-                        Left = Visit(leftContext).ToExpressionIfRequired(),
-                        TextSpan = textSpan
-                    });
-            }
+            assignments.AddRange(leftContexts.Select(leftContext => new AssignmentExpression
+                {Left = Visit(leftContext).ToExpressionIfRequired(), TextSpan = textSpan}));
 
             if (context.yield_expr().Length == 1)
             {
@@ -343,7 +336,7 @@ namespace PT.PM.PythonParseTreeUst
                        return x;
                    }));
             }
-            else
+            else if (context.testlist() != null) // in case we have "x: int" only with no assignment
             {
                 var rightContexts = context.testlist().children
                     .Where(x => (x as ITerminalNode)?.Symbol.Type == PythonLexer.COMMA);

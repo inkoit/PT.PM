@@ -230,19 +230,16 @@ namespace PT.PM.PythonParseTreeUst
                 return Visit(context.testlist_star_expr());
             }
 
-            PythonParser.Assign_partContext assign_part = context.assign_part();
+            var assign_part = context.assign_part();
 
             if (assign_part.COLON() != null)
             {
                 return ProcessAnnassign(context, assign_part);
             }
 
-            if (assign_part.op != null)
-            {
-                return ProcessAugmented_assign(context, assign_part);
-            }
-
-            return ProcessAssign(context, assign_part);
+            return assign_part.op != null
+                ? ProcessAugmented_assign(context, assign_part)
+                : ProcessAssign(context, assign_part);
         }
 
         private Expression ProcessAssign(PythonParser.Expr_stmtContext parent,
@@ -327,44 +324,30 @@ namespace PT.PM.PythonParseTreeUst
             assignments.AddRange(leftContexts.Select(leftContext => new AssignmentExpression
                 {Left = Visit(leftContext).ToExpressionIfRequired(), TextSpan = textSpan}));
 
-            if (context.yield_expr().Length == 1)
+            if (context.testlist() == null)
             {
-                var right = Visit(context.yield_expr(0)).ToExpressionIfRequired();
-                result.Variables.AddRange(assignments.Select(x =>
-                   {
-                       x.Right = right;
-                       return x;
-                   }));
+                return result;
             }
-            else if (context.testlist() != null) // in case we have "x: int" only with no assignment
+            
+            var rightContexts = context.testlist().children
+                .Where(x => (x as ITerminalNode)?.Symbol.Type == PythonLexer.COMMA);
+            if (rightContexts.Count() == assignments.Count)
             {
-                var rightContexts = context.testlist().children
-                    .Where(x => (x as ITerminalNode)?.Symbol.Type == PythonLexer.COMMA);
-                if (rightContexts.Count() == assignments.Count)
+                result.Variables.AddRange(assignments.Select((assign, index) =>
                 {
-                    result.Variables.AddRange(assignments.Select((assign, index) =>
-                    {
-                        assign.Right = Visit(rightContexts.ElementAt(index)).ToExpressionIfRequired();
-                        return assign;
-                    }));
-                }
+                    assign.Right = Visit(rightContexts.ElementAt(index)).ToExpressionIfRequired();
+                    return assign;
+                }));
             }
-
             return result;
         }
 
         private Expression ProcessAugmented_assign(PythonParser.Expr_stmtContext parent, PythonParser.Assign_partContext context)
         {
-            ParserRuleContext rightContext;
-            if (context.yield_expr().Length == 1)
-            {
-                rightContext = context.yield_expr(0);
-            }
-            else
-            {
-                rightContext = context.testlist();
-            }
-            return CreateBinaryOperatorExpression(parent.testlist_star_expr(), context.op.Text.Remove(context.op.Text.Length - 1), context.op.GetTextSpan(), rightContext);
+            return CreateBinaryOperatorExpression(parent.testlist_star_expr(),
+                                                  context.op.Text.Remove(context.op.Text.Length - 1),
+                                                  context.op.GetTextSpan(),
+                                                  (ParserRuleContext) context.yield_expr() ?? context.testlist());
         }
 
         public Ust VisitTestlist_star_expr(PythonParser.Testlist_star_exprContext context)

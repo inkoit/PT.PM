@@ -595,9 +595,9 @@ namespace PT.PM.PythonParseTreeUst
             {
                 result.ElseBlock = (BlockStatement)Visit(context.else_clause());
             }
-            if (context.finaly_clause() != null)
+            if (context.finally_clause() != null)
             {
-                result.FinallyBlock = (BlockStatement)Visit(context.finaly_clause());
+                result.FinallyBlock = (BlockStatement)Visit(context.finally_clause());
             }
             return result;
         }
@@ -621,7 +621,7 @@ namespace PT.PM.PythonParseTreeUst
             return Visit(context.suite());
         }
 
-        public Ust VisitFinaly_clause([NotNull] PythonParser.Finaly_clauseContext context)
+        public Ust VisitFinally_clause([NotNull] PythonParser.Finally_clauseContext context)
         {
             return Visit(context.suite());
         }

@@ -152,6 +152,12 @@ namespace PT.PM.PythonParseTreeUst
 
         public Ust VisitVardef_parameter([NotNull] PythonParser.Vardef_parameterContext context)
         {
+            // In case we have an asterisk instead of argument
+            if (context.name() == null)
+            {
+                return null;
+            }
+            
             var parameter = new ParameterDeclaration
             {
                 Name = new IdToken(context.name().GetText(), context.name().GetTextSpan()),

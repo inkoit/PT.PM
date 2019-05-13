@@ -155,7 +155,7 @@ namespace PT.PM.PythonParseTreeUst
             // In case we have an asterisk instead of argument
             if (context.name() == null)
             {
-                return null;
+                return new ParameterDeclaration {Name = new IdToken("*")};
             }
             
             var parameter = new ParameterDeclaration

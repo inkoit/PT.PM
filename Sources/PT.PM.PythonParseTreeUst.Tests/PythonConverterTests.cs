@@ -10,7 +10,7 @@ namespace PT.PM.PythonParseTreeUst.Tests
     {
         //TODO: add python2 examples
         [TestCase("python3", "examples")]
-        [TestCase("python", "samples")]
+        [TestCase("python", "examples")]
         public void Convert_PythonFiles_WithoutErrors(string langFolder, string examplesFolder)
         {
             TestUtility.CheckProject(Path.Combine(TestUtility.GrammarsDirectory, langFolder, examplesFolder),
